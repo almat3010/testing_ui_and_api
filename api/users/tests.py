@@ -36,8 +36,43 @@ def test_auth_using_login_pass(anon_client: 'APIClient', user_with_password: 'Us
     assert data['username'] == username
 
 
+@pytest.fixture
+def users_data():
+    users_count = 20
+    users_data = []
+    for i in range(users_count):
+        users_data.append(
+            {
+            'username': f'user_{i}',
+            'password': f'password_{i}',
+            'email': f'email_{i}@mail.ru',
+            }
+        )
+    return users_data
+
 @pytest.mark.django_db
-def test_user_flow(admin_client: 'APIClient', anon_client: 'APIClient'):
+def test_user_flow(admin_client: 'APIClient', anon_client: 'APIClient', users_data):
+    for user in users_data:
+        response = admin_client.post(
+        '/api/v1/users/',
+        data=user
+    )
+        assert response.status_code == 201
+
+    response = admin_client.get('/api/v1/users/')
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert data['count'] == 20
+
+    users = data.get('results')
+    for user_id in users:
+        response = anon_client.post(
+            f'/api/v1/users/{user_id["id"]}/'
+        )
+        print(user_id)
+        assert response.status_code == 200
+
     """
     TODO Дополните тест.
      Требуется подготовить данные для создания нескольких рандомных пользователей используя клиент для admin
@@ -62,7 +97,7 @@ def test_user_flow(admin_client: 'APIClient', anon_client: 'APIClient'):
         }
         for i in range(users_count)
     ]
-
+pytest -s -v --tb=long users/tests.py
     """
 
-    ...
+ 
