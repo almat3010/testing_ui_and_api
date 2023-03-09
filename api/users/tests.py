@@ -43,9 +43,9 @@ def users_data():
     for i in range(users_count):
         users_data.append(
             {
-            'username': f'user_{i}',
-            'password': f'password_{i}',
-            'email': f'email_{i}@mail.ru',
+                'username': f'user_{i}',
+                'password': f'password_{i}',
+                'email': f'email_{i}@mail.ru',
             }
         )
     return users_data
@@ -56,22 +56,36 @@ def test_user_flow(admin_client: 'APIClient', anon_client: 'APIClient', users_da
         response = admin_client.post(
         '/api/v1/users/',
         data=user
-    )
+        )
         assert response.status_code == 201
 
-    response = admin_client.get('/api/v1/users/')
+    response = admin_client.get('/api/v1/users/?pageSize=20')
     assert response.status_code == 200
-    
+    print(response)
     data = response.json()
+    print(f'\n{data}')
     assert data['count'] == 20
 
-    users = data.get('results')
-    for user_id in users:
+    for user in users_data:
         response = anon_client.post(
-            f'/api/v1/users/{user_id["id"]}/'
-        )
-        print(user_id)
+        '/api/auth/login/', data={'username': user['username'], 'password': user['password']}
+    )
         assert response.status_code == 200
+        
+    users = data['results']
+    # for created_users_id in users:
+    #     response = anon_client.post(
+    #         f'/api/v1/users/{created_users_id["id"]}/',
+    #         Allow = 'POST'
+    #     )
+    #     assert response.status_code == 200
+    
+    # response = anon_client.post('/api/v1/users/13')
+    for created_users_id in users:
+        response = admin_client.delete(
+            f'/api/v1/users/{created_users_id["id"]}/'
+        )
+        assert response.status_code == 204
 
     """
     TODO Дополните тест.
@@ -97,7 +111,7 @@ def test_user_flow(admin_client: 'APIClient', anon_client: 'APIClient', users_da
         }
         for i in range(users_count)
     ]
-pytest -s -v --tb=long users/tests.py
+
     """
 
  
