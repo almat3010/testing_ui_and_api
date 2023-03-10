@@ -1,5 +1,6 @@
 from .base_page import BasePage
 from .locators import LoginPageLocators
+from .locators import BasePageLocators
 
 class LoginPage(BasePage):
     def should_be_login_page(self):
@@ -11,8 +12,8 @@ class LoginPage(BasePage):
 
     def should_be_login_form(self):
         assert self.is_element_present(*LoginPageLocators.LOGIN_FORM), "login form is not presented"
-
-    def sign_in(self, username, password):
+    
+    def fill_form_reg(self, username, password):
         username_input = self.browser.find_element(*LoginPageLocators.USERNAME_REGISTRATION)
         username_input.send_keys(username)
 
@@ -22,4 +23,14 @@ class LoginPage(BasePage):
         submit = self.browser.find_element(*LoginPageLocators.SUBMIT_BTN)
         submit.click()
 
-        assert self.is_element_present(*LoginPageLocators.ALERT_CONFIRM), "login failed"
+    def sign_in(self, username='start_admin', password='starter12345'):
+        self.fill_form_reg(username, password)
+
+        assert self.is_element_present(*BasePageLocators.ALERT), "login failed"
+        assert 'Successful authorization' in self.browser.find_element(*BasePageLocators.ALERT).text
+    
+    def should_be_popup_invalid_credentials(self, username, password):
+        self.fill_form_reg(username, password)
+
+        assert self.is_element_present(*BasePageLocators.ALERT), "pop up is not displayed"
+        assert 'Invalid credentials' in self.browser.find_element(*BasePageLocators.ALERT).text
