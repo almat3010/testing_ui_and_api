@@ -1,5 +1,4 @@
 from .base_page import BasePage
-from .locators import LoginPageLocators
 from .locators import BasePageLocators
 from .locators import DashboardPageLocators
 
@@ -20,3 +19,16 @@ class DashboardPage(BasePage):
         create_entry.click()
         
         assert self.is_disappeared(*DashboardPageLocators.MODAL_UPLOAD_FILE)
+        assert 'Файл загружен' in self.browser.find_element(*BasePageLocators.ALERT).text
+
+    def should_be_disappear_modal(self):
+        self.should_be_open_modal()
+        close_modal_btn = self.browser.find_element(*DashboardPageLocators.CLOSE_MODAL_BTN)
+        close_modal_btn.click()
+        assert self.is_disappeared(*DashboardPageLocators.MODAL_UPLOAD_FILE)
+
+    def should_be_logout(self):
+        logout_btn = self.browser.find_element(*DashboardPageLocators.LOGOUT)
+        logout_btn.click()
+        assert self.is_disappeared(*DashboardPageLocators.LOGOUT)
+        assert 'Logged Out' in self.browser.find_element(*BasePageLocators.ALERT).text
